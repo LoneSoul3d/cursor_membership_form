@@ -1,5 +1,6 @@
 <?php
 include 'config/admin_auth.php';
+include '../../includes/functions.php';
 
 if (!isAdminLoggedIn()) {
     redirectToLogin();
@@ -24,7 +25,7 @@ if (!isAdminLoggedIn()) {
                 <h2>Admin Panel</h2>
             </div>
             <div style="display: flex; align-items: center; gap: 15px;">
-                <span>Welcome, <?php echo $_SESSION['admin_name']; ?></span>
+                <span>Welcome, <?php echo e($_SESSION['admin_name']); ?></span>
                 <form method="POST" style="display:inline; margin:0;" onsubmit="return confirmAction('Logout now?');">
                     <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCsrfToken()); ?>">
                     <input type="hidden" name="logout" value="1">

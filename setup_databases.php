@@ -1,4 +1,9 @@
 <?php
+// Guard: allow running only from CLI to prevent accidental/hostile web execution
+if (php_sapi_name() !== 'cli') {
+    http_response_code(403);
+    exit('Forbidden');
+}
 // Database configuration via environment variables for safety
 $host = getenv('DB_HOST') ?: 'localhost';
 $username = getenv('DB_USERNAME') ?: 'root';

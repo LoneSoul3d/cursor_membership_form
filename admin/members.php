@@ -82,13 +82,13 @@ $members = $conn->query("SELECT * FROM members $where_clause ORDER BY created_at
                 <tbody>
                     <?php while($member = $members->fetch_assoc()): ?>
                     <tr>
-                        <td><?php echo $member['member_id']; ?></td>
-                        <td><?php echo $member['first_name'] . ' ' . $member['last_name']; ?></td>
-                        <td><?php echo $member['father_name']; ?></td>
-                        <td><?php echo $member['cnic']; ?></td>
-                        <td><?php echo $member['mobile']; ?></td>
-                        <td><?php echo $member['education']; ?></td>
-                        <td><?php echo $member['membership_type']; ?></td>
+                        <td><?php echo e($member['member_id']); ?></td>
+                        <td><?php echo e($member['first_name'] . ' ' . $member['last_name']); ?></td>
+                        <td><?php echo e($member['father_name']); ?></td>
+                        <td><?php echo e($member['cnic']); ?></td>
+                        <td><?php echo e($member['mobile']); ?></td>
+                        <td><?php echo e($member['education']); ?></td>
+                        <td><?php echo e($member['membership_type']); ?></td>
                         <td>
                             <form method="POST" style="display: inline;">
                                 <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCsrfToken()); ?>">
@@ -103,13 +103,13 @@ $members = $conn->query("SELECT * FROM members $where_clause ORDER BY created_at
                         </td>
                         <td><?php echo date('M j, Y', strtotime($member['created_at'])); ?></td>
                         <td class="action-buttons">
-                            <a href="view_member.php?id=<?php echo $member['id']; ?>" class="btn btn-info btn-sm" title="View">
+                            <a href="view_member.php?id=<?php echo (int)$member['id']; ?>" class="btn btn-info btn-sm" title="View">
                                 <i class="fas fa-eye"></i>
                             </a>
-                            <a href="edit_member.php?id=<?php echo $member['id']; ?>" class="btn btn-warning btn-sm" title="Edit">
+                            <a href="edit_member.php?id=<?php echo (int)$member['id']; ?>" class="btn btn-warning btn-sm" title="Edit">
                                 <i class="fas fa-edit"></i>
                             </a>
-                            <a href="?delete=<?php echo $member['id']; ?>" class="btn btn-danger btn-sm" title="Delete" onclick="return confirmAction('Are you sure you want to delete this member?')">
+                            <a href="?delete=<?php echo (int)$member['id']; ?>" class="btn btn-danger btn-sm" title="Delete" onclick="return confirmAction('Are you sure you want to delete this member?')">
                                 <i class="fas fa-trash"></i>
                             </a>
                         </td>

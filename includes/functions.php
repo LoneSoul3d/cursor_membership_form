@@ -2,8 +2,11 @@
 function sanitizeInput($data) {
     $data = trim($data);
     $data = stripslashes($data);
-    $data = htmlspecialchars($data);
     return $data;
+}
+
+function e($value) {
+    return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
 }
 
 function validateCNIC($cnic) {
