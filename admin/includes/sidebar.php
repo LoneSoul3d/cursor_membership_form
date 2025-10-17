@@ -11,12 +11,12 @@
             </a>
         </li>
         <li>
-            <a href="members.php?status=pending" class="<?php echo isset($_GET['status']) && $_GET['status'] == 'pending' ? 'active' : ''; ?>">
+            <a href="members.php?status=Pending" class="<?php echo isset($_GET['status']) && $_GET['status'] == 'Pending' ? 'active' : ''; ?>">
                 <i class="fas fa-clock"></i> Pending Approvals
             </a>
         </li>
         <li>
-            <a href="members.php?status=approved" class="<?php echo isset($_GET['status']) && $_GET['status'] == 'approved' ? 'active' : ''; ?>">
+            <a href="members.php?status=Approved" class="<?php echo isset($_GET['status']) && $_GET['status'] == 'Approved' ? 'active' : ''; ?>">
                 <i class="fas fa-check-circle"></i> Approved Members
             </a>
         </li>

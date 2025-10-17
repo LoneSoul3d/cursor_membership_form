@@ -1,5 +1,6 @@
 <?php
 include 'config/admin_auth.php';
+include '../includes/functions.php';
 
 if (isAdminLoggedIn()) {
     header('Location: dashboard.php');
@@ -9,17 +10,32 @@ if (isAdminLoggedIn()) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = $_POST['username'] ?? '';
     $password = $_POST['password'] ?? '';
-    
-    if (isset($admin_users[$username]) && $admin_users[$username]['password'] === $password) {
+    $csrf = $_POST['csrf_token'] ?? '';
+
+    // Simple session-based rate limit
+    $_SESSION['login_attempts'] = ($_SESSION['login_attempts'] ?? 0);
+    $_SESSION['last_login_attempt'] = ($_SESSION['last_login_attempt'] ?? 0);
+    $now = time();
+    if ($_SESSION['login_attempts'] >= 5 && ($now - $_SESSION['last_login_attempt']) < 300) {
+        $error = "Too many attempts. Try again later.";
+    } else if (!verifyCsrfToken($csrf)) {
+        $error = "Invalid session. Please try again.";
+    } else if (isset($admin_users[$username]) && password_verify($password, $admin_users[$username]['password_hash'])) {
+        // Regenerate session ID on login
+        session_regenerate_id(true);
         $_SESSION['admin_logged_in'] = true;
         $_SESSION['admin_username'] = $username;
         $_SESSION['admin_name'] = $admin_users[$username]['name'];
         $_SESSION['admin_role'] = $admin_users[$username]['role'];
+        $_SESSION['login_attempts'] = 0;
+        $_SESSION['last_login_attempt'] = $now;
         
         header('Location: dashboard.php');
         exit();
     } else {
         $error = "Invalid username or password!";
+        $_SESSION['login_attempts'] = ($_SESSION['login_attempts'] ?? 0) + 1;
+        $_SESSION['last_login_attempt'] = $now;
     }
 }
 ?>
@@ -41,10 +57,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
             
             <?php if (isset($error)): ?>
-                <div class="alert alert-error"><?php echo $error; ?></div>
+                <div class="alert alert-error"><?php echo e($error); ?></div>
             <?php endif; ?>
             
             <form method="POST">
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCsrfToken()); ?>">
                 <div class="form-group">
                     <label for="username">Username</label>
                     <input type="text" id="username" name="username" class="form-control" required>

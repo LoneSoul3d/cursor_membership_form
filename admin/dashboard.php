@@ -4,6 +4,7 @@ include 'includes/header.php';
 include 'includes/sidebar.php';
 
 include '../../config/database.php';
+include '../../includes/functions.php';
 $conn = getDBConnection();
 
 // Get statistics
@@ -25,19 +26,19 @@ $recent_members = $conn->query("SELECT * FROM members ORDER BY created_at DESC L
     <div class="stats-grid">
         <div class="stat-card">
             <h3>Total Members</h3>
-            <div class="number"><?php echo $total_members; ?></div>
+            <div class="number"><?php echo (int)$total_members; ?></div>
         </div>
         <div class="stat-card pending">
             <h3>Pending Approval</h3>
-            <div class="number"><?php echo $pending_members; ?></div>
+            <div class="number"><?php echo (int)$pending_members; ?></div>
         </div>
         <div class="stat-card approved">
             <h3>Approved</h3>
-            <div class="number"><?php echo $approved_members; ?></div>
+            <div class="number"><?php echo (int)$approved_members; ?></div>
         </div>
         <div class="stat-card rejected">
             <h3>Rejected</h3>
-            <div class="number"><?php echo $rejected_members; ?></div>
+            <div class="number"><?php echo (int)$rejected_members; ?></div>
         </div>
     </div>
 
@@ -59,21 +60,21 @@ $recent_members = $conn->query("SELECT * FROM members ORDER BY created_at DESC L
                 <tbody>
                     <?php while($member = $recent_members->fetch_assoc()): ?>
                     <tr>
-                        <td><?php echo $member['member_id']; ?></td>
-                        <td><?php echo $member['first_name'] . ' ' . $member['last_name']; ?></td>
-                        <td><?php echo $member['cnic']; ?></td>
-                        <td><?php echo $member['mobile']; ?></td>
+                        <td><?php echo e($member['member_id']); ?></td>
+                        <td><?php echo e($member['first_name'] . ' ' . $member['last_name']); ?></td>
+                        <td><?php echo e($member['cnic']); ?></td>
+                        <td><?php echo e($member['mobile']); ?></td>
                         <td>
                             <span class="status-badge status-<?php echo strtolower($member['status']); ?>">
-                                <?php echo $member['status']; ?>
+                                <?php echo e($member['status']); ?>
                             </span>
                         </td>
                         <td><?php echo date('M j, Y', strtotime($member['created_at'])); ?></td>
                         <td class="action-buttons">
-                            <a href="view_member.php?id=<?php echo $member['id']; ?>" class="btn btn-info btn-sm">
+                            <a href="view_member.php?id=<?php echo (int)$member['id']; ?>" class="btn btn-info btn-sm">
                                 <i class="fas fa-eye"></i>
                             </a>
-                            <a href="edit_member.php?id=<?php echo $member['id']; ?>" class="btn btn-warning btn-sm">
+                            <a href="edit_member.php?id=<?php echo (int)$member['id']; ?>" class="btn btn-warning btn-sm">
                                 <i class="fas fa-edit"></i>
                             </a>
                         </td>
