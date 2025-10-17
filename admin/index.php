@@ -9,8 +9,13 @@ if (isAdminLoggedIn()) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = $_POST['username'] ?? '';
     $password = $_POST['password'] ?? '';
-    
-    if (isset($admin_users[$username]) && $admin_users[$username]['password'] === $password) {
+    $csrf = $_POST['csrf_token'] ?? '';
+
+    if (!verifyCsrfToken($csrf)) {
+        $error = "Invalid session. Please try again.";
+    } else if (isset($admin_users[$username]) && password_verify($password, $admin_users[$username]['password_hash'])) {
+        // Regenerate session ID on login
+        session_regenerate_id(true);
         $_SESSION['admin_logged_in'] = true;
         $_SESSION['admin_username'] = $username;
         $_SESSION['admin_name'] = $admin_users[$username]['name'];
@@ -45,6 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <?php endif; ?>
             
             <form method="POST">
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCsrfToken()); ?>">
                 <div class="form-group">
                     <label for="username">Username</label>
                     <input type="text" id="username" name="username" class="form-control" required>

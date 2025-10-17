@@ -2,8 +2,6 @@
 include '../config/database.php';
 
 header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST');
 
 function sendError($message) {
     echo json_encode(['error' => $message]);
@@ -164,6 +162,12 @@ function checkExisting() {
         return json_encode(['exists' => false]);
     }
     
+    // Whitelist allowed fields to prevent SQL injection via column names
+    $allowedFields = ['email', 'mobile', 'cnic'];
+    if (!in_array($field, $allowedFields, true)) {
+        return json_encode(['exists' => false]);
+    }
+
     $conn = getDBConnection();
     
     // Remove dashes from CNIC for comparison

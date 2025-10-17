@@ -6,26 +6,36 @@ include 'includes/sidebar.php';
 include '../../config/database.php';
 $conn = getDBConnection();
 
-// Handle status filter
-$status_filter = $_GET['status'] ?? '';
+// Handle status filter (normalize case and validate)
+$status_param = $_GET['status'] ?? '';
+$status_filter = '';
 $where_clause = '';
-if ($status_filter && in_array($status_filter, ['Pending', 'Approved', 'Rejected'])) {
-    $where_clause = "WHERE status = '$status_filter'";
-    $page_title = ucfirst($status_filter) . " Members";
+if ($status_param) {
+    $normalized = ucfirst(strtolower($status_param));
+    if (in_array($normalized, ['Pending', 'Approved', 'Rejected'], true)) {
+        $status_filter = $normalized;
+        $where_clause = "WHERE status = '$status_filter'";
+        $page_title = $status_filter . " Members";
+    }
 }
 
-// Handle status update
+// Handle status update (CSRF protected)
 if (isset($_POST['update_status'])) {
-    $member_id = $_POST['member_id'];
-    $new_status = $_POST['status'];
-    
-    $stmt = $conn->prepare("UPDATE members SET status = ? WHERE id = ?");
-    $stmt->bind_param("si", $new_status, $member_id);
-    
-    if ($stmt->execute()) {
-        $success = "Member status updated successfully!";
+    $csrf = $_POST['csrf_token'] ?? '';
+    if (!function_exists('verifyCsrfToken') || !verifyCsrfToken($csrf)) {
+        $error = 'Invalid session token';
     } else {
-        $error = "Error updating member status!";
+        $member_id = (int)($_POST['member_id'] ?? 0);
+        $new_status = $_POST['status'] ?? '';
+        if (in_array($new_status, ['Pending', 'Approved', 'Rejected'], true) && $member_id > 0) {
+            $stmt = $conn->prepare("UPDATE members SET status = ? WHERE id = ?");
+            $stmt->bind_param("si", $new_status, $member_id);
+            if ($stmt->execute()) {
+                $success = "Member status updated successfully!";
+            } else {
+                $error = "Error updating member status!";
+            }
+        }
     }
 }
 
@@ -39,9 +49,9 @@ $members = $conn->query("SELECT * FROM members $where_clause ORDER BY created_at
             <h1><?php echo $page_title; ?></h1>
             <div style="display: flex; gap: 10px;">
                 <a href="members.php" class="btn btn-primary <?php echo !$status_filter ? 'active' : ''; ?>">All</a>
-                <a href="members.php?status=pending" class="btn btn-warning <?php echo $status_filter == 'pending' ? 'active' : ''; ?>">Pending</a>
-                <a href="members.php?status=approved" class="btn btn-success <?php echo $status_filter == 'approved' ? 'active' : ''; ?>">Approved</a>
-                <a href="members.php?status=rejected" class="btn btn-danger <?php echo $status_filter == 'rejected' ? 'active' : ''; ?>">Rejected</a>
+                <a href="members.php?status=Pending" class="btn btn-warning <?php echo $status_filter === 'Pending' ? 'active' : ''; ?>">Pending</a>
+                <a href="members.php?status=Approved" class="btn btn-success <?php echo $status_filter === 'Approved' ? 'active' : ''; ?>">Approved</a>
+                <a href="members.php?status=Rejected" class="btn btn-danger <?php echo $status_filter === 'Rejected' ? 'active' : ''; ?>">Rejected</a>
             </div>
         </div>
 
@@ -81,6 +91,7 @@ $members = $conn->query("SELECT * FROM members $where_clause ORDER BY created_at
                         <td><?php echo $member['membership_type']; ?></td>
                         <td>
                             <form method="POST" style="display: inline;">
+                                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCsrfToken()); ?>">
                                 <input type="hidden" name="member_id" value="<?php echo $member['id']; ?>">
                                 <select name="status" onchange="this.form.submit()" style="padding: 4px 8px; border-radius: 3px; border: 1px solid #ddd;">
                                     <option value="Pending" <?php echo $member['status'] == 'Pending' ? 'selected' : ''; ?>>Pending</option>

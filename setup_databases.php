@@ -1,15 +1,15 @@
 <?php
-// Database configuration
-$host = 'localhost';
-$username = 'shaikh3d';
-$password = 'salamshaikh';
+// Database configuration via environment variables for safety
+$host = getenv('DB_HOST') ?: 'localhost';
+$username = getenv('DB_USERNAME') ?: 'root';
+$password = getenv('DB_PASSWORD') ?: '';
 
 // Create connection
-$conn = new mysqli($host, $username, $password);
+$conn = @new mysqli($host, $username, $password);
 
 // Check connection
 if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+    die('Connection failed.');
 }
 
 // Create databases
@@ -251,7 +251,7 @@ $conn->query("CREATE TABLE members (
     town VARCHAR(100) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
-    membership_type ENUM('Regular', 'Student', 'Senior', 'Life') NOT NULL,
+    membership_type ENUM('Basic', 'Privilege', 'Elite') NOT NULL,
     reference1_name VARCHAR(100) NOT NULL,
     reference1_contact VARCHAR(15) NOT NULL,
     reference2_name VARCHAR(100) NOT NULL,

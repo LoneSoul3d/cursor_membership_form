@@ -25,15 +25,21 @@ if (!isAdminLoggedIn()) {
             </div>
             <div style="display: flex; align-items: center; gap: 15px;">
                 <span>Welcome, <?php echo $_SESSION['admin_name']; ?></span>
-                <a href="?logout" class="btn btn-danger btn-sm">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </a>
+                <form method="POST" style="display:inline; margin:0;" onsubmit="return confirmAction('Logout now?');">
+                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCsrfToken()); ?>">
+                    <input type="hidden" name="logout" value="1">
+                    <button type="submit" class="btn btn-danger btn-sm">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </form>
             </div>
         </div>
     </header>
 
     <?php
-    if (isset($_GET['logout'])) {
-        adminLogout();
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['logout'])) {
+        if (verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+            adminLogout();
+        }
     }
     ?>
